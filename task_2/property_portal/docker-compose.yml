@@ -1,0 +1,42 @@
+services:
+
+  portal-frontend:
+    build:
+      context: ./portal_frontend
+    container_name: property-portal-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      MODEL_API_URL: http://model-server:8000
+      #NEXT_PUBLIC_MARKET_API_URL: http://localhost:8080
+      NEXT_PUBLIC_MARKET_API_URL: http://market-analysis-backend:8080
+    depends_on:
+      - market-analysis-backend
+      - model-server
+
+  market-analysis-backend:
+    build:
+      context: ./market_analysis_backend
+    container_name: property-market-analysis-backend
+    ports:
+      - "8080:8080"
+    environment:
+      MODEL_SERVER_URL: http://model-server:8000
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+      - model-server
+
+  redis:
+    image: redis:7-alpine
+    container_name: property-portal-redis
+    ports:
+      - "6379:6379"
+
+  model-server:
+    build:
+      context: ./model_server
+    container_name: property-portal-model-server
+    ports:
+      - "8000:8000"
